@@ -1,5 +1,6 @@
 const restify = require('restify');
 const { BotFrameworkAdapter, ConversationState, MemoryStorage } = require('botbuilder');
+const { BotActivityHandler } = require('./BotActivityHandler')
 
 const adapter = new BotFrameworkAdapter({
     appId: '',
@@ -17,8 +18,12 @@ server.listen(3978, () => {
     console.log(`${server.name} is listinig to the Bot ${server.url}`);
 })
 
+const memory = new MemoryStorage();
+let conversationState = new ConversationState(memory);
+const mainBot = new BotActivityHandler(conversationState);
+
 server.post('/api/messages', (req,res) => {
     adapter.processActivity(req,res, async(context) => {
-        await context.sendActivity('Welcome to Celebal Technologies');
+        await mainBot.run(context);
     })
 })
